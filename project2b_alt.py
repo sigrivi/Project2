@@ -2,6 +2,7 @@ import numpy as np
 import math
 import matplotlib.pyplot as plt
 from scipy import linalg
+import scipy as sp
 import sys
 import time
 
@@ -24,7 +25,7 @@ def elements_of_A(rho_N, N): #makes a tridiagonalmatrix A. Arguments: maximal rh
 	return(A)
 
 
-def rotate_A(A, k, l): #rotates matrix A around an angle theta. The operations are on matrix elements A_kk, A_kl, A_lk, A_ll
+def rotate_A(A, X, k, l): #rotates matrix A around an angle theta. 
 	
 	N = A.shape[0]
 	B = A.copy()
@@ -37,8 +38,15 @@ def rotate_A(A, k, l): #rotates matrix A around an angle theta. The operations a
 	t1 = tau - math.sqrt( tau**2+1 ) # t=tan(theta)
 	t2 = tau + math.sqrt( tau**2+1 )
 	t = t1
+	
 	if t2**2 < t1**2: #choose the smaller value of t1 and t2
 		t = t2
+	
+	c = (t**2+1)**(-0.5) ## c = cos(theta)
+	s = c*t ## s = sin(theta)
+	
+	Y = X.copy()
+
 	for i in range(N):
 		if (i!=l and i!=k):
 			B[i,k] = (A[i,k]-A[i,l]*t)*(t**2+1)**(-0.5)
@@ -46,12 +54,15 @@ def rotate_A(A, k, l): #rotates matrix A around an angle theta. The operations a
 			B[k,i] = B[i,k]
 			B[l,i] = B[i,l]
 
+		Y[i,k] = c*X[i,k] - s*X[i,l]
+		Y[i,l] = c*X[i,l] + s*X[i,k]
+
 	B[l,l] = (A[l,l] + 2*A[k,l]*t + A[k,k]*t**2)/(t**2+1)
 	B[k,k] = (A[k,k] - 2*A[k,l]*t + A[l,l]*t**2)/(t**2+1)
 	B[k,l] = 0
 	B[l,k] = 0
 
-	return(B)
+	return(B,Y)
 
 
 
@@ -68,31 +79,49 @@ def max_of(A): #finds the maximum non-diagonal value
 def jacobi(A, epsilon): #performs the jacobi iterations. Arguments: matrix A and tolerance epsilon
 	maxvalue, m,n = max_of(A)
 	n_iter=0
-	x = np.ones(A.shape[0])
+	X = np.identity(A.shape[0])
 	while (maxvalue>epsilon):
-		A = rotate_A(A,m,n)
+		A,X = rotate_A(A,X,m,n)
 		maxvalue, m,n = max_of(A)
 		n_iter+=1
 		#print(n_iter,maxvalue)
-	return(A,n_iter)		
+	return(A, X, n_iter)		
 	
-def eigenvalues(A):
-	eigenvalue = np.zeros(A.shape[0])
-	for i in range(A.shape[0]):
-		eigenvalue[i] = A[i,i]
-	eigenvalue.sort()
-	return(eigenvalue)
+
 		
-A = elements_of_A(10,100) ## N = 150 makes the three first eigenvalues converge with four leading digits
+A = elements_of_A(10,60) ## N = 150 makes the three first eigenvalues converge with four leading digits
+C = np.copy(A)
+B, X, iterations = jacobi(C,1.e-8) #B is the matrix with eigenvalues along diagonal, X is the matrix of eigenvectors
 
-B, iterations = jacobi(A,1.e-8)
+eigenvalues = B.diagonal() #eigenvalues is a vector of eigenvalues
+#print(eigenvalues)
+eig_sort = np.sort( eigenvalues )
+index = np.argsort (eigenvalues )
+X=X.transpose() #the eigenvectors are now rows in X
+eigenvector = np.zeros((B.shape[0],B.shape[1]))
+for i in range(B.shape[0]):
+	eigenvector[i,:] = X[index[i],:]
+	
 
-print(np.sort(np.real(linalg.eigh(A)[0]))) #to compare eigenvalues with eigenvalues from python solver
+#print(eig_sort)
+#print(index)
 
-X = linalg.eigh(A)[1]
-x1 = X[0]**2
-x2 = X[1]**2
-plt.plot(x1)
+#print(np.sort(np.real(linalg.eigh(A)[0]))) #to compare eigenvalues with eigenvalues from python solver
+D = elements_of_A(10,60)
+a,Z = linalg.eigh(D)
+#a = np.real(linalg.eigh(A)[0])
+print(a)
+
+z0 = Z[0]**2
+z1 = Z[1]**2
+
+innerproduct = np.dot( eigenvector[3], eigenvector[3])
+#print(innerproduct)
+
+#print(np.abs(X-Z))
+#plt.plot(X[2,:]**2)
+plt.plot(eigenvector[1]**2)
+plt.plot(z1)
 plt.show()
 #print(eigenvalues(B))
 

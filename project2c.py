@@ -6,6 +6,8 @@ import sys
 import time
 
 
+## THIS IS A SET OF UNIT TESTS FOR THE FUNCTIONS IN PROJECT2B ##
+
 ## makes a tridiagonal matrix. A[i,i] = 2/h**2+rho[i+1]**2, A[i,i+1] = -1/h**2, A[i+1,i] = -1/h**2
 from project2b import elements_of_A ## Arguments: (maxium rho value, dimension of matrix). Returns: (matrix)
 
