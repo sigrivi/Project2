@@ -1,0 +1,25 @@
+Benchmark calculations
+
+When you run project2b_alt.py, you the three lowest eigenvalues are printed. These should be 2.9998046796 6.99902527766 10.9977802627
+(whith rho_N = 5, N=200, and tolerance ). The plots you get should be the same as those in figure 1 in the report. 
+If you set N=10, and print matrix A, you should get: 
+[[  8.25  -4.     0.     0.     0.     0.     0.     0.     0.     0.  ]
+ [ -4.     9.    -4.     0.     0.     0.     0.     0.     0.     0.  ]
+ [  0.    -4.    10.25  -4.     0.     0.     0.     0.     0.     0.  ]
+ [  0.     0.    -4.    12.    -4.     0.     0.     0.     0.     0.  ]
+ [  0.     0.     0.    -4.    14.25  -4.     0.     0.     0.     0.  ]
+ [  0.     0.     0.     0.    -4.    17.    -4.     0.     0.     0.  ]
+ [  0.     0.     0.     0.     0.    -4.    20.25  -4.     0.     0.  ]
+ [  0.     0.     0.     0.     0.     0.    -4.    24.    -4.     0.  ]
+ [  0.     0.     0.     0.     0.     0.     0.    -4.    28.25  -4.  ]
+ [  0.     0.     0.     0.     0.     0.     0.     0.    -4.    33.  ]]
+the eigenvalues should be: [  2.91948414   6.58303426   9.93655701  12.91647441  15.47247171 17.95312738  20.94588615  24.61459558  29.21277575  35.69559361]
+and the first three eigenvectors: 
+[  4.89171561e-01   6.51884188e-01   5.01776480e-01   2.67685921e-01  1.05905080e-01   3.23038766e-02   7.80873510e-03   1.52847780e-03  2.46543047e-04   3.27835305e-05]
+[ -5.25487733e-01  -2.18992509e-01   3.93163380e-01   5.79421678e-01  3.91513450e-01   1.71008390e-01   5.38336757e-02   1.29273699e-02  2.45519306e-03   3.71760611e-04] 
+[ 0.49433528 -0.20843116 -0.44553336  0.17351883  0.53504492  0.4034526 0.1773962   0.0539388   0.01224511  0.00212373]
+
+When you run project2d.py, you will get the plots of figure 2 in the report, if you change 0 in X = eigenvector_i(rho_N,N,0) to 1, you will have the plots of figure 3, and if you change it to 2 you will have the plots of figure 4. (rho_N = 15 and N = 100)
+If you use omega = 0.25 in elements_of_A the three lowest eigenvalues you get are:   1.24956495    2.18812072    3.1455795  when you run eigenvalues_and_eigenvectors(A,1.e-8)
+If you use omega = 0.05 in elements_of_A the three lowest eigenvalues you get are:   0.35083218    0.54680617    0.79333838 when you run eigenvalues_and_eigenvectors(A,1.e-8)
+

@@ -7,7 +7,7 @@ import sys
 import time
 
 
-## functions
+## functions--------------------------------------------------------------------
 
 def elements_of_A(rho_N, N): #makes a tridiagonalmatrix A. Arguments: maximal rho value(rho_max) and dimension of matrix(N)
 	A = np.zeros((N,N))
@@ -45,7 +45,7 @@ def rotate_A(A, X, k, l): #rotates matrix A around an angle theta.
 	c = (t**2+1)**(-0.5) ## c = cos(theta)
 	s = c*t ## s = sin(theta)
 	
-	Y = X.copy()
+	Y = X.copy() #matrix of eigen vectors
 
 	for i in range(N):
 		if (i!=l and i!=k):
@@ -54,7 +54,7 @@ def rotate_A(A, X, k, l): #rotates matrix A around an angle theta.
 			B[k,i] = B[i,k]
 			B[l,i] = B[i,l]
 
-		Y[i,k] = c*X[i,k] - s*X[i,l]
+		Y[i,k] = c*X[i,k] - s*X[i,l] 
 		Y[i,l] = c*X[i,l] + s*X[i,k]
 
 	B[l,l] = (A[l,l] + 2*A[k,l]*t + A[k,k]*t**2)/(t**2+1)
@@ -84,46 +84,60 @@ def jacobi(A, epsilon): #performs the jacobi iterations. Arguments: matrix A and
 		A,X = rotate_A(A,X,m,n)
 		maxvalue, m,n = max_of(A)
 		n_iter+=1
-		#print(n_iter,maxvalue)
 	return(A, X, n_iter)		
 	
 
-		
-A = elements_of_A(10,60) ## N = 150 makes the three first eigenvalues converge with four leading digits
-C = np.copy(A)
-B, X, iterations = jacobi(C,1.e-8) #B is the matrix with eigenvalues along diagonal, X is the matrix of eigenvectors
-
-eigenvalues = B.diagonal() #eigenvalues is a vector of eigenvalues
-#print(eigenvalues)
-eig_sort = np.sort( eigenvalues )
-index = np.argsort (eigenvalues )
-X=X.transpose() #the eigenvectors are now rows in X
-eigenvector = np.zeros((B.shape[0],B.shape[1]))
-for i in range(B.shape[0]):
-	eigenvector[i,:] = X[index[i],:]
+def eigenvalues_and_eigenvectors(A, epsilon): # use the jacobi function, then returns sorted eigenvalues as a matrix, and sorted eigenvalues as rows in a matrix
 	
+	B, X, iterations = jacobi(A,epsilon) #B is the matrix with eigenvalues along diagonal, X is the matrix of eigenvectors
+	print("iteration:", iterations)
+	eigenvalues = B.diagonal() #eigenvalues is a vector of eigenvalues
+	eig_sort = np.sort( eigenvalues )
+	index = np.argsort (eigenvalues )
+	X=X.transpose() #the eigenvectors are now rows in X
+	eigenvector = np.zeros((B.shape[0],B.shape[1]))
+	for i in range(B.shape[0]):
+		eigenvector[i,:] = X[index[i],:]
+	
+	return(eig_sort, eigenvector)
 
-#print(eig_sort)
-#print(index)
 
-#print(np.sort(np.real(linalg.eigh(A)[0]))) #to compare eigenvalues with eigenvalues from python solver
-D = elements_of_A(10,60)
-a,Z = linalg.eigh(D)
-#a = np.real(linalg.eigh(A)[0])
-print(a)
+if __name__ == '__main__':
+	rho_N = 5  ## The maximum rho value
+	N = 200 ## N = 200 makes the three first eigenvalues converge with approx. four leading digits after decimal point
+	epsilon = 1.e-8 
+	rho = np.linspace(0,rho_N,num = N) ## a vector for plotting eigenvectors against rho
+	A = elements_of_A(rho_N,N)  ## Make the discretization matrix
+	#print(A)
 
-z0 = Z[0]**2
-z1 = Z[1]**2
+	time1=time.time()
+	eig_val, eig_vec = eigenvalues_and_eigenvectors(A, epsilon)  ## Solve the eigenvalue problem
+	time2=time.time()
+	#print(eig_val)
+	#print(eig_vec[0], eig_vec[1], eig_vec[2])
+	print(eig_val[0],eig_val[1], eig_val[2]) ## print three lowest eigenvalues
+	#print("time jacobi:",(time2-time1))
 
-innerproduct = np.dot( eigenvector[3], eigenvector[3])
-#print(innerproduct)
+	plt.plot(rho, eig_vec[0]**2, rho, eig_vec[1]**2, rho, eig_vec[2]**2) ## plot eigenvectors of the three lowest states
+	plt.title("Probability distribution for the three lowest energy states")
+	plt.xlabel("rho")
+	plt.ylabel("radial probability")
+	plt.legend(["ground state","1. energy state", "2. energy state"])
+	#plt.savefig('one_electron.png',dpi=225)
+	plt.show()
 
-#print(np.abs(X-Z))
-#plt.plot(X[2,:]**2)
-plt.plot(eigenvector[1]**2)
-plt.plot(z1)
-plt.show()
-#print(eigenvalues(B))
+
+	#print(np.sort(np.real(linalg.eigh(A)[0]))) #to compare eigenvalues with eigenvalues from python solver
+	D = elements_of_A(rho_N,N)
+	time3=time.time()
+	a,Z = linalg.eigh(D) ## python eigenvalues solver
+	Z=Z.transpose()
+	time4=time.time()
+	#print("time python",time4-time3)
+
+	plt.plot(rho, Z[0]**2,'r', rho, eig_vec[0]**2, 'b') ## plot python solution together with my solution, to check that they are equal. 
+	plt.show()
+
 
 
 
